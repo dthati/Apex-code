@@ -1,0 +1,127 @@
+public class SSEAccountListCtrl1 {
+
+public list<account> dnacclist{get; set;}
+Public LIST<Id> accDupeIds{get;set;}
+Public LIST<Account> accdupeList{get;set;}
+public string dnsquery{get; set;}
+public  string current_dndupe ='0l';
+public string current_dnLsId;
+public string prev_dndupe;
+public string prev_dnlsid ;
+public List <Account> dnupdatedAccList;
+  
+    public SSEAccountListCtrl1(ApexPages.StandardController stdController)
+    {
+        dnacclist =[SELECT id, Lsid__c,Name,DunsNumber,CRMFusionDupeKey__c,createdDate FROM Account where DunsNumber !=null order by DunsNumber , CreatedDate Asc NULLS LAST limit 5];
+       // String dnsquery = 'SELECT id, Lsid__c,CRMFusionDupeKey__c,createdDate FROM Account where CRMFusionDupeKey__c !=null order by CRMFusionDupeKey__c , LsId__c DESC NULLS LAST';
+      //  return Database.getQueryLocator(dnsquery);
+    }
+   
+    public void sseshowPage()
+    {
+       
+         dnupdatedAccList=new List<Account>();
+          for (account a: dnacclist) {
+            current_dndupe = a.DunsNumber ;
+               if (a.Lsid__c != null) {
+                    prev_dnlsid = a.Lsid__c; 
+                                 
+                } else if (a.Lsid__c == null && prev_dndupe == a.DunsNumber ) {
+                    a.Lsid__c = prev_dnLsId;
+                    dnupdatedAccList.add(a);
+                    prev_dndupe = a.DunsNumber ;
+                } else if ((a.Lsid__c == null && prev_dndupe != a.DunsNumber && prev_dndupe != null) ) {
+                    a.Lsid__c = a.Id;
+                    dnupdatedAccList.add(a);
+                    prev_dndupe = a.DunsNumber ;
+                     prev_dnlsid = a.Lsid__c; 
+                } else if((a.Lsid__c == null && prev_dndupe != a.DunsNumber && prev_dndupe == null) ) {
+                    a.Lsid__c = a.Id;
+                    prev_dnlsid = a.Lsid__c;
+                    dnupdatedAccList.add(a);
+                    
+                }
+            
+            prev_dndupe = a.DunsNumber ;
+        }
+         if(dnupdatedAccList.size() > 0){
+          database.update(dnupdatedAccList);
+        }
+    }   
+    
+}
+
+
+-----------------------------------------------
+
+public class SSEAccountListCtrl {
+
+ public SSEAccountListCtrl(ApexPages.StandardController controller) {
+           
+            }
+       Public PageReference showPage(){
+        
+        batchAccountUpdate b=new batchAccountUpdate();
+        DataBase.executeBatch(b,200);
+        return new PageReference('/001/o');
+       
+    }
+    
+}
+
+global class batchAccountUpdate implements Database.Batchable<sObject>
+{
+public list<account> gnacclist{get; set;}
+Public LIST<Id> accDupeIds{get;set;}
+Public LIST<Account> accdupeList{get;set;}
+public string gnsquery{get; set;}
+public  string current_gndupe;
+public string current_gnLsId;
+public string prev_gndupe;
+public string prev_gnlsid ;
+public List <Account> gnupdatedAccList;
+
+
+  
+    global Database.QueryLocator start(Database.BatchableContext BC)
+    {
+        squery = 'SELECT id, Lsid__c,Name,Group_Number__c,CRMFusionDupeKey__c,createdDate FROM Account where Group_Number__c !=null order by Group_Number__c ,lsid__c DESC NULLS LAST';
+        return Database.getQueryLocator(squery);
+    }
+   
+    global void execute(Database.BatchableContext BC, List<Account> accList)
+    {
+       
+         gnupdatedAccList=new List<Account>();
+          for (account a: gnacclist) {
+            current_gndupe = a.Group_Number__c ;
+               if (a.Lsid__c != null) {
+                    prev_gnlsid = a.Lsid__c; 
+                                 
+                } else if (a.Lsid__c == null && prev_gndupe == a.Group_Number__c ) {
+                    a.Lsid__c = prev_gnLsId;
+                    gnupdatedAccList.add(a);
+                    prev_gndupe = a.Group_Number__c ;
+                } else if ((a.Lsid__c == null && prev_gndupe != a.Group_Number__c && prev_gndupe != null) ) {
+                    a.Lsid__c = a.Id;
+                    gnupdatedAccList.add(a);
+                    prev_gndupe = a.Group_Number__c ;
+                     prev_gnlsid = a.Lsid__c; 
+                } else if((a.Lsid__c == null && prev_gndupe != a.Group_Number__c && prev_gndupe == null) ) {
+                    a.Lsid__c = a.Id;
+                    prev_gnlsid = a.Lsid__c;
+                    gnupdatedAccList.add(a);
+                    
+                }
+            
+            prev_gndupe = a.Group_Number__c ;
+        }
+         if(gnupdatedAccList.size() > 0){
+          database.update(gnupdatedAccList);
+        }
+    }   
+    global void finish(Database.BatchableContext BC)
+    
+    {
+    }
+}

@@ -1,0 +1,13 @@
+trigger outstandingTasks on Case (before update) {
+    Task[] allTasks = [SELECT id, status, whatid FROM Task WHERE whatid in :Trigger.newmap.keyset()];
+    for (Case c : Trigger.new) {
+        if((c.status == 'Closed' || c.status == 'Closed - First Call' || c.status == 'Closed in Portal') && (Trigger.oldmap.get(c.id).Status != 'Closed' && Trigger.oldmap.get(c.id).Status != 'Closed - First Call' && Trigger.oldmap.get(c.id).Status != 'Closed in Portal')) {
+            for (Task t : allTasks) {
+                if(t.whatid == c.id && t.status != 'Completed') {
+                    c.Status = Trigger.oldmap.get(c.id).Status;
+                    c.addError(' All tasks must be completed before the case can be closed. ');
+                }
+            }
+        }
+    }
+}

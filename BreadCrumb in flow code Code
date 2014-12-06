@@ -1,0 +1,125 @@
+<apex:page controller="SSEFlowctrlJim">
+<script>
+    Sfdc.onReady(function() {
+        var bcString = Sfdc.Dom.getText(Sfdc.get('breadcrumb'));
+        var bcArray = bcString.split('|');
+        var bcNav = Sfdc.get('breadcrumbNav');
+        var numElems = bcArray.length;
+        var elemNum = 0;
+        Sfdc.Array.forEach(bcArray, function(bc) {
+            elemNum++;
+            if (elemNum < numElems) {
+                // all but the last one are navigatable
+                var el = Sfdc.Dom.create(bcNav,
+                    {className:"breadcrumbNavElem",
+                     href:"javascript:bcNavigate(" + (numElems - elemNum) + ");",
+                     innerHTML:bc + ">"},
+                    "a");
+            }
+            else {
+                Sfdc.Dom.create(bcNav,
+                    {className:"breadcrumbNavElem",
+                     innerHTML:bc},
+                     "span");
+            }
+        });
+    });
+    Sfdc.onload(function() {
+        var el = Sfdc.get('prevClickCount');
+        var prevClickCount = el.innerHTML;
+        if (prevClickCount > 0) {
+            alert(prevClickCount);
+            bcNavigate(prevClickCount);
+        }
+    });
+    function bcNavigate(eid) {
+        var bcNav = Sfdc.get('.FlowPreviousBtn');
+        if (eid > 1) {
+             Sfdc.Dom.create(bcNav.parentNode,
+                    {type: "hidden",
+                     name: "prevClickCount",
+                     value: (eid-1)},
+                     "input");
+        }
+        bcNav.click();
+        return false;
+    }
+ </script>
+<style>
+body .bPageBlock .pbBody .labelCol ,body .bPageBlock .pbBody .dataCol{
+    padding: 10px 5px;
+}
+body .bPageBlock, body #bodyCell .bResource .secondaryPalette, body .secondaryPalette.bPageBlock, body .individualPalette .secondaryPalette.bPageBlock, body .bodyDiv .genericTable, body .genericPageBlockTable, body .bodyDiv .bSubBlock, body .bComponentBlock .bPageBlock, body .bMyDashboard .bPageBlock, body.rlHoverFrame .bPageBlock, body.subjectSelectionPopup div.choicesBox, body.lookupTab .secondaryPalette.bPageBlock, body.popupTab .secondaryPalette.bPageBlock, body.UserTagStatsPage .secondaryPalette.bPageBlock {
+    background-color: #fff;
+}
+#breadcrumbNav {
+    padding: 10px 0px;
+}
+.breadcrumbNavElem {
+    padding-right: 5px;
+}
+</style>
+ 
+    <div id="breadcrumb" style="display: none"><apex:outputText value="{!breadcrumb}"/></div>
+    <div id="prevClickCount" style="display: none"><apex:outputText value="{!prevClickCount}"/></div>
+    <div id="breadcrumbNav"></div>
+ 
+    <flow:interview name="IFR_Flow_Jim" interview="{!mFlow}" finishLocation="{!redUrl}"> 
+        <apex:param value="{!ConId}" name="v_ConId"/> 
+    </flow:interview>
+</apex:page>
+
+
+
+
+-----------------------------------------
+
+
+public class SSEFlowctrlJim{
+
+    public String ConId {get; set;}
+    
+    public String breadcrumb;
+    public Integer prevClickCount {get; set;}
+
+    public flow.interview.IFR_Flow_Jim mFlow {get; set;}
+    
+    public SSEFlowCtrlJim(ApexPages.StandardController controller){
+        ConId=ApexPages.currentPage().getParameters().get('id'); 
+    }
+    
+    public SSEFlowctrlJim() {
+        ConId=ApexPages.currentPage().getParameters().get('id');
+    }
+    
+    public PageReference getredUrl()
+    {
+        String surl;
+        if(mFlow!=null){
+            surl=mFlow.v_CreateIFRId;
+        }
+        else
+        {
+            surl=ConId;
+        }
+        return new Pagereference('/'+surl);
+    }
+    
+    
+    public void setBreadcrumb(String crumb)
+    {
+        breadcrumb = crumb;
+    }
+
+    
+    public String getBreadcrumb()
+    {
+        String bcs = '';
+        for (String bc : mFlow.breadcrumb) {
+            if (bcs.length() > 0) { bcs = bcs + '|'; }
+            bcs = bcs + bc;
+        }
+        return bcs;
+    }
+
+}

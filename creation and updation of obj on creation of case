@@ -1,0 +1,48 @@
+Assist:18954
+
+ Please write an APEX Trigger to create a new Member Support object record on a new Case record save.
+
+- Map the following values from the source Case record to populate the new Member Support object record on a new Incident record save:
+CaseNumber > Member_Support__c.Case__c
+Case.Project__c > Member_Support__c.Project__c
+Case.Description > Member_Support__c.Short_Description__c 
+
+Also updation of fields on change of case fields
+1) On creation of case record,we can assign the project field with the project field associated to the case Contact.
+
+
+trigger CreateMemberSupport on Case (after insert,after update){
+    for (Case cs : Trigger.new)
+        {
+          if(Trigger.isInsert){
+           // Fetch Case details 
+                      cs=[select AccountId,Project__c,ContactId,OwnerId,Description from Case where Id =: cs.Id];
+           
+           // Fetching project from contact to assign it to "project" field on Case
+                 Contact c=[select id,Name,Project__c from Contact where id=:cs.ContactId];
+                
+            // updation of Contact Project to Case Project
+                 cs.Project__c=c.Project__c;
+                 update cs;
+                                         
+           // Creation of Member Support Object
+                 Member_Support__c ms = new Member_Support__c ();
+                       ms.Contact__c=cs.ContactId;
+                       ms.Case__c=cs.Id;
+                       ms.Project__c=cs.Project__c;
+                       ms.Short_Description__c=cs.Description;
+                       ms.Crimson_Business_Analyst__c=cs.OwnerId;
+                          insert ms;
+                         
+        }
+     
+          // Updating the description field(Member support) on updating description of case
+           if(Trigger.isUpdate){
+            // Fetch Case details 
+                    cs=[select AccountId,Project__c,ContactId,OwnerId,Description from Case where Id =: cs.Id];
+                    Member_Support__c ms1=[Select id,Short_Description__c,Case__r.id from Member_Support__c where Case__r.id=:cs.Id];   
+                       ms1.Short_Description__c=cs.Description;
+                       update ms1;
+                       }
+  }          
+}

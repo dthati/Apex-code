@@ -1,0 +1,136 @@
+
+		-----------------FLASH----------
+
+<apex:flash src=="/resource/filename" height=" " width=" " play="true" loop="true"></apex:flash>
+
+
+
+--------------place flow in cust portal -----------
+
+create a apexpage to execute the flow ,
+
+create a custom link with url "/apex/pagename"
+
+create a custom component with anyname and add link to component.
+
+
+enable in custom layout 
+
+----------------------backgroundimage$--------------------------
+background: url({!$Resource.bodyBg}) ;
+
+background-image: url('{!$Resource.resource_name}');
+
+--------------------- userinfo.getuserId ----------------------
+[select id,section__c from user where id = Userinfo.getUserId().
+
+
+---------------------FormulafieldImage ------------------------
+
+IMAGE('https://na1.salesforce.com/resource/1340296871000/CirrusLogo', 'img' , 100, 100)
+---------------------FlowFinishLocation ------------------------
+
+  public PageReference getfinLocation(){
+    String returnId;
+    if(ppflow != null) returnId = ppflow.opprid;
+    return new PageReference('/'+returnId);
+    }
+
+
+<flow:interview name="PartnerPortalFlow" interview="{!ppflow}" finishLocation="{!finLocation}" >
+<apex:param name="LeadID" value="{!leadRecId}"/>
+</flow:interview>
+
+------------apex:image----------
+<apex:image value="{!URLFOR($Resource.Site_PartnerBanner)}"/>
+
+-----------------output link----------
+<apex:outputLink value="/secur/logout.jsp" target="_top" id="logout" style="font-weight:bold;">logout</apex:outputLink>
+
+--------------LoggedInUser-------------
+MyRecentCases = [select id,CaseNumber,Subject,Status,LastModifiedDate 
+                         from Case 
+                         where ContactId = :loggedInUser.ContactId 
+                         order by LastModifiedDate desc limit 3];
+
+-------------------Date time formats in Event	-----------------------
+e.StartDateTime=System.now();
+e.EndDateTime =System.now().addHours(2);
+----------------------
+
+Date dToday = System.Today();
+Datetime dt = datetime.newInstance(dToday.year(), dToday.month(),dToday.day());
+evt.StartDateTime=dt.addHours(14);
+evt.EndDateTime=dt.addHours(16);
+
+------------------
+
+  ev.StartDateTime = reservation.reservationDate__c ;
+       ev.EndDateTime= ev.StartDateTime.addHours(1); 
+
+
+-------------Side component in SCC -----------
+
+var iframeTagElements = parent.window.document.getElementsByTagName('iframe');
+
+for(var i=0;i<iframeTagElements.length;i++){
+if(iframeTagElements[i].src.indexOf('PFSPage') != -1){
+
+iframeTagElements[i].src= '/apex/PFSPage?id={!Lead.Id}';
+
+}
+}
+
+
+----------sub tab in SCC ------------
+
+srcUp( 'http://www.dove.co.uk/en/products/ProductsRecommender.aspx#Hair Care');
+
+
+-----------Slider JS script code -----------
+
+<script type="text/javascript"> 
+     <apex:includeScript value="{!$Resource.SliderJS}"/>
+  </script>
+
+-----------------Dynamic User's Calender-----------
+
+ PageReference pr =new PageReference('/00U/c?cType=1&cal_lkid='+userSelected);
+//userSelected is value from picklist in VF. 
+
+
+---------------finishlocationInFlow-----------
+
+<flow:interview name="flowname" finishLocation="{!URLFOR('/home/home.jsp')}"/>
+
+<flow:interview name="flowname" finishLocation="{!URLFOR('/001D000000IpE9X')}"/>
+
+--------------------Custom Article Rendering ---------------------
+
+<apex:repeat value="{!controllerArticles}" var="article">
+    <a href="{!$Site.CurrentSiteUrl}articles/Article_Type/{!article.urlName}">{!article.title}</a><br/>
+</apex:repeat>
+
+
+---------------------Rename Q&A-----------------------
+Create a Custom tab with Vf(inside create a action method with required url)
+ body.chatterAnswersTab #tabBar li:nth-child(4){
+        border-bottom: 3px solid #c1d72e;
+        color: #000 !Important;
+    }
+
+
+-------------------Change Background based on click -----------------
+
+
+ <script type="text/javascript" src="https://code.jquery.com/jquery-1.8.3.min.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('.bottombtn').click(function () {
+                $('.bottombtn').each(function () {
+                    $(this).removeClass('clicked');
+                });
+                $(this).addClass('clicked');
+            });
+        });
+    </script>

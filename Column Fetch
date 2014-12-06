@@ -1,0 +1,115 @@
+---controller-----------
+
+public class Accdetails {
+
+        public Account Acc;
+    Public List<Account> AccList{get;set;}
+    
+
+    public Accdetails(ApexPages.StandardController controller) {
+    
+           this.Acc=(Account )controller.getRecord();
+
+    }
+ 
+   public PageReference Accdetails() 
+         {
+         AccList=[SELECT id,Name,Married__c,Has_Kids__c,Has_a_Production_Company__c,Comfortable_with_Mass_Retailers__c FROM Account];
+        
+        String para4=Apexpages.currentPage().getParameters().get('para');
+         if(para4!=null)
+           {
+              AccList=[SELECT id,Name,Married__c,Has_Kids__c,Has_a_Production_Company__c,Comfortable_with_Mass_Retailers__c FROM Account where Married__c =: para4];
+           }
+
+         String para6=Apexpages.currentPage().getParameters().get('para1');
+         if(para6!=null)
+           {
+              AccList=[SELECT id,Name,Married__c,Has_Kids__c,Has_a_Production_Company__c,Comfortable_with_Mass_Retailers__c FROM Account where Has_Kids__c =: para6];
+           }
+    
+     String para7=Apexpages.currentPage().getParameters().get('para3');
+         if(para7!=null)
+            {
+                AccList=[SELECT id,Name,Married__c,Has_Kids__c,Has_a_Production_Company__c,Comfortable_with_Mass_Retailers__c FROM Account where Has_a_Production_Company__c =: para6];
+            
+            }
+            
+                 return null;
+        }
+ 
+}
+
+-----------page----------
+
+
+<apex:page standardController="Account" extensions="Accdetails" action="{!Accdetails}">
+
+  <script type="text/javascript">
+ 
+      function getSelectedID(id) {     
+         viewFunction(document.getElementById(id).value);
+         }
+         
+      function getSelectedID1(id) {     
+         viewFunction1(document.getElementById(id).value);
+              }
+              
+     function getSelectedID2(id) {     
+         viewFunction2(document.getElementById(id).value);
+              }
+                            
+     function getSelectedID3(id) {     
+         viewFunction3(document.getElementById(id).value);
+              }
+              
+    </script>
+    
+      <apex:form >
+  
+       <apex:actionFunction name="viewFunction" id="vfunc" action="{!Accdetails}" rerender="test">
+              <apex:param name="para" value=""/>   
+       </apex:actionFunction>
+  
+       <apex:actionFunction name="viewFunction1" id="vfunc1" action="{!Accdetails}" rerender="test">
+              <apex:param name="para1" value=""/>  
+       </apex:actionFunction>
+      
+       <apex:actionFunction name="viewFunction2" id="vfunc2" action="{!Accdetails}" rerender="test">
+              <apex:param name="para2" value=""/>  
+       </apex:actionFunction>
+   
+      <!-- <apex:actionFunction name="viewFunction3" id="vfunc3" action="{!Accdetails}" rerender="test">
+              <apex:param name="para3" value=""/>  
+       </apex:actionFunction>-->
+       
+      <apex:outputLabel value="Married :" for="Married__c"/>
+          <apex:inputField id="married" value="{!Account.Married__c}" onchange="getSelectedID('{!$Component.married}');" />         
+
+     <apex:outputLabel value="Has Kids :" for="Has_Kids__c"/>
+          <apex:inputField id="Has_Kids" value="{!Account.Has_Kids__c}" onchange="getSelectedID('{!$Component.Has_Kids}');" />  
+              
+     <apex:outputLabel value="Has a Production Company :" for="Production"/>
+          <apex:inputField id="production" value="{!Account.Has_a_Production_Company__c}" onchange="getSelectedID('{!$Component.production}');" />  
+          
+      <apex:outputLabel value="Comfortable with Mass Retailers :" for="married"/>
+          <apex:inputField id="comfortable" value="{!Account.Comfortable_with_Mass_Retailers__c}" onchange="getSelectedID('{!$Component.comfortable}');" />  
+
+  
+  <apex:pageBlock >
+         
+            <apex:pageBlockTable title="Account Details:"  value="{!AccList}" var="a" border="1" cellpadding="3" id="test">
+                 <apex:column headerValue="Profile" value="{!a.Married__c}" />                              
+                 <apex:column headerValue="Interests" value="{!a.Has_Kids__c}" />                              
+                 <apex:column headerValue="Cuases" value="{!a.Has_a_Production_Company__c}"/>                            
+                                              
+            </apex:pageBlockTable>
+    
+    </apex:pageBlock>
+
+  
+   </apex:form>  
+
+</apex:page>
+
+

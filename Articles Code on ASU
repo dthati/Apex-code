@@ -1,0 +1,251 @@
+<!----------- page ------------------>
+
+<apex:page showHeader="false" sidebar="false" controller="vfKeywordSearchCont">
+<style type="text/css">
+body 
+{
+background-color: #DDDDDD;
+}
+.sign
+{
+margin-left: 927px;
+margin-top: 6px;
+position: absolute;
+}
+.help
+{
+margin-top:221px;
+position:absolute;
+margin-left:43px;
+}
+.position
+{
+    margin-left: 904px;
+    margin-top: -767px;
+    position: absolute;
+}
+
+ #loginBox {
+   
+    margin: 50px;
+    padding-top: 200px;
+}
+
+td{
+vertical-align : top;
+text-align: left;
+}
+.form
+{
+background: none repeat scroll 0 0 transparent;
+   margin-left: 10px;
+margin-top: -755px;
+position: absolute;
+    width:550px;
+    background:#fff;
+
+}
+input {
+    border: 3px solid #CCCCCC;
+    }
+
+form
+{
+width:640px;
+background:url('/resource/searchbg');
+}
+.bPageBlock brndScnBrd apexDefaultPageBlock secondaryPalette
+{
+background:#fff;
+}
+body .bPageBlock .pbHeader
+{
+/*background:#fff;*/
+background:url('/resource/searchbg');
+}
+body .bPageBlock, body #bodyCell .bResource .secondaryPalette, body .secondaryPalette.bPageBlock, body .individualPalette .secondaryPalette.bPageBlock, body .bodyDiv .genericTable, body .genericPageBlockTable, body .bodyDiv .bSubBlock, body .bComponentBlock .bPageBlock, body .bMyDashboard .bPageBlock, body.rlHoverFrame .bPageBlock, body.subjectSelectionPopup div.choicesBox, body.lookupTab .secondaryPalette.bPageBlock, body.popupTab .secondaryPalette.bPageBlock, body.UserTagStatsPage .secondaryPalette.bPageBlock 
+{
+    background-color:#fff;
+    border:none;
+    height:615px;
+}
+
+
+.button
+{
+background: #FFBF0E;
+    border: 2px solid #000000;
+    border-radius: 4px 4px 4px 4px;
+    color: #990033;
+    font-size: 14px;
+    margin-top: -1px;
+    width:62px;
+}
+
+#hide
+{
+display:none;
+}
+
+</style>
+
+<div style="width:1024px;margin:0 auto;"   >
+<div class="sign">
+<a href="http://sdo-139731cff08.force.com/Login"><apex:image value="{!URLFOR($Resource.Sign)}"/></a>
+</div>
+<div class="help">
+<a href="http://sdo-139731cff08.force.c​om/SocialSupport"> <apex:image value="{!URLFOR($Resource.olsite1)}"/></a>
+</div>
+<apex:image value="{!URLFOR($Resource.OLsitebg)}"/>
+
+<div style="position:absolute;z-index:2;">
+
+
+<!--   chat button -->
+
+<span class="position">
+<img id="liveagent_button_online_573300000000esf" style="display: none; border: 0px none; cursor: pointer" onclick="liveagent.startChat('573300000000esf')" src="https://sdo-139731cff08.secure.force.com/resource/1346742180000/LAOnline" /><img id="liveagent_button_offline_573300000000esf" style="display: none; border: 0px none; " src="https://sdo-139731cff08.secure.force.com/resource/1346741861000/LAOffline" />
+<script type="text/javascript">
+if (!window._laq) { window._laq = []; }
+window._laq.push(function(){liveagent.showWhenOnline('573300000000esf', document.getElementById('liveagent_button_online_573300000000esf'));
+liveagent.showWhenOffline('573300000000esf', document.getElementById('liveagent_button_offline_573300000000esf'));
+});</script>
+
+
+
+
+
+
+<!-- deployement -->
+<script type='text/javascript' src='https://c.la1s1.salesforceliveagent.com/content/g/deployment.js'></script>
+<script type='text/javascript'>
+liveagent.init('https://d.la1s1.salesforceliveagent.com/chat', '572300000000efw', '00D30000001aVtv');
+</script>
+
+</span>
+
+
+<!-- search ----------->
+
+<span class="form">
+<apex:form >
+
+
+<!--<apex:pageBlock title="." >-->
+<table>
+<tr><td style="width:570px;">
+<apex:inputText value="{!searchstring}" id="theSearchstring" maxlength="70" size="90"/>
+
+
+</td>
+<td>
+
+<apex:commandButton value="Search" id="submitButton" style="background: #FFBF0E; border: 2px solid #000000;border-radius: 4px 4px 4px 4px;color: #990033;font-size: 14px;margin-top:-1px;width:62px;"  reRender="theSearchResults" onclick="getElementById('hide').style.display = 'block'" />
+</td>
+</tr></table>
+
+<!--</apex:pageBlock>-->
+<apex:messages />
+
+<div id="hide" >
+<!--<apex:outputPanel layout="block">
+    <ul>
+        <knowledge:articleList articleVar="article"  categories="School:ASU"  sortBy="mostViewed"  pageSize="10" >
+            <li><a href="{!URLFOR($Action.KnowledgeArticle.View, article.id)}">{!article.title}</a></li>
+        </knowledge:articleList>
+    </ul>
+</apex:outputPanel>-->
+
+<apex:pageBlock title="Article List" >
+<apex:panelGroup id="theSearchResults" >
+<apex:panelGrid width="99%">
+<table width="99%">
+<tr>
+<th width="33%">Title</th>
+<th width="33%">Article Type</th>
+<th width="33%">Summary</th>
+</tr>
+</table> 
+<knowledge:articleList articleVar="article" pageNumber="{!currentPageNumber}" 
+Keyword="{!searchstring}" hasMoreVar="false" pageSize="10" categories="School:ASU">
+<table width="99%">
+<tr>
+<td width="33%">
+<apex:outputLink target="_blank" value="{!URLFOR($Action.KnowledgeArticle.View,
+article.id,['popup' = 'true'])}">{!article.title}</apex:outputLink>
+</td>
+<td width="33%"><apex:outputText >{!article.articleTypeLabel}</apex:outputText></td>
+<td width="33%"><apex:outputText >{!article.abstract}</apex:outputText></td>
+</tr>
+</table>
+</knowledge:articleList>
+</apex:panelGrid>
+<apex:panelGrid columns="2">
+<apex:commandLink action="{!previous}" value="Previous" style="{!IF(prevRequired =
+true,'display:block','display:none')}" reRender="theSearchResults"/>
+<apex:commandLink action="{!next}" value="Next" style="{!IF(nextRequired =true,'display:block','display:none')}" reRender="theSearchResults"/>
+</apex:panelGrid>
+</apex:panelGroup>
+</apex:pageBlock>
+</div>
+</apex:form>
+</span>
+
+</div>
+
+ </div>
+ 
+ </apex:page>
+
+
+
+-------------  controller ----------
+
+
+public with sharing class vfKeywordSearchCont {
+//Page Size
+ 
+private Static Final Integer PAGE_NUMBER = 10;
+//Search String used in ArticleList tag
+public String searchstring { get; set; }
+public vfKeywordSearchCont() {
+String qryString = 'SELECT Id, title, UrlName, LastPublishedDate,LastModifiedById FROM KnowledgeArticleVersion WHERE (PublishStatus = \'online\' and Language = \'en_US\'  )  ';
+
+
+ 
+List<KnowledgeArticleVersion> articleList= Database.query(qryString);
+ 
+
+maxSize = articleList.size() ;
+}
+//Keeps track of current page & max size of article list
+Integer currentPage = 1;
+Integer maxSize = 1;
+// Returns whether we need to see previous button or not
+public boolean getPrevRequired() {
+return currentPage > 1;
+
+}
+// Returns whether we need to see next button or not
+public boolean getNextRequired() {
+return currentPage * PAGE_NUMBER < maxSize;
+}
+//Returns current page number
+public Decimal getCurrentPageNumber() {
+return this.currentPage;
+}
+//action for next click
+public PageReference next() {
+if(maxSize > this.currentPage * PAGE_NUMBER) {
+this.currentPage = this.currentPage + 1;
+}
+return null;
+}
+//action for previous click
+public PageReference previous() {
+if(this.currentPage > 1)
+this.currentPage = this.currentPage - 1;
+return null;
+}
+}
+                                      

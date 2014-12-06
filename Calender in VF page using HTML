@@ -1,0 +1,21 @@
+<apex:page showHeader="false" sidebar="false" standardController="Case" extensions="SSECaseProblemDescriptionController" id="flowpage">
+<apex:form id="formid">
+    <table>
+    <tr>
+    <td><b># of Devices at the Problem Location:</b></td>
+    <td><apex:inputText value="{!NumOfDev}" /></td>
+    </tr>
+    <tr>
+    <td><b>Devices impacted by this Problem Type</b></td>
+    <td><apex:inputText value="{!Devicesimpacted}" /></td>
+    </tr>
+    <tr>
+    <td><b>Date of last page received at Problem Lo</b></td>
+    <td><apex:inputText value="{!DateOfLastPage}"  onfocus="DatePicker.pickDate(true, 'flowpage:formid:testingId', false);" id="testingId"/></td></tr>
+    <tr><td colspan="2"><apex:commandButton Value="Next" action="{!UpdateReDiFlow}"/></td></tr>
+    </table>
+</apex:form>
+
+
+
+</apex:page>

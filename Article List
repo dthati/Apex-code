@@ -1,0 +1,198 @@
+
+-------------  page  ----------------
+
+<apex:page controller="VfSearchController" sidebar="false" title="Knowledge Search">
+<style>
+td{
+vertical-align : top;
+text-align: left;
+}
+</style>
+<apex:form >
+<apex:panelGrid columns="2" >
+<apex:panelGroup >
+<apex:pageBlock >
+<apex:outputText value="Filter Your Results" />
+<apex:pageBlockSection columns="1">
+<apex:dataTable value="{!dataCategoryGroupInfo}" var="dataCategory" id="dataCategory">
+<apex:column width="20%">
+<apex:outputLabel for="categoryType_{!dataCategory.name}">{!dataCategory.name}</apex:outputLabel>
+<br />
+<select id="categoryType_{!dataCategory.name}" name="categoryType_{!dataCategory.name}" onchange = "refreshSearchResult()" >
+<!--<option value="NoFilter">No Filter</option>
+<option value="All">All</option> -->
+<knowledge:categoryList categoryVar="category" categoryGroup="{!dataCategory.name}" rootCategory="All" level="-1">
+<option value="{!category.name}">
+<apex:outputText escape="false" value="{!LPAD(' ',6*category.depth,'&nbsp;')}"/>
+{!category.label}
+</option>
+</knowledge:categoryList>
+</select>
+</apex:column>
+</apex:dataTable>
+</apex:pageBlockSection>
+</apex:pageBlock>
+<!--<apex:pageBlock >
+<apex:outputText value="Last Updated Promotions" />
+<apex:pageBlockSection columns="1">
+<knowledge:articleList articleVar="article" articleTypes="Promotion__kav" pageSize="10">
+<li>
+<apex:outputLink target="_blank" value="{!URLFOR($Action.KnowledgeArticle.View,article.id, ['popup' = 'true'])}">{!article.title}</apex:outputLink>
+</li>
+</knowledge:articleList>
+</apex:pageBlockSection>
+</apex:pageBlock>-->
+</apex:panelGroup>
+<apex:panelGroup >
+<apex:pageBlock title="Search" >
+<apex:inputText value="{!searchstring}" id="theSearchstring" maxlength="100" size="110" onkeypress="if (event.keyCode == 13) {refreshSearchResult();return false;} "/> &nbsp;
+<apex:commandButton value="Go" id="submitButton" style="width:30" reRender="theSearchResults" />
+</apex:pageBlock>
+<apex:messages />
+<apex:panelGroup id="theSearchResults" >
+<apex:pageBlock title="Search Results" >
+<apex:panelGrid width="100%">
+<table width="99%">
+<tr>
+<th width="33%">Title</th>
+<th width="33%">Article Type</th>
+<th width="33%">Summary</th>
+</tr>
+</table>
+<knowledge:articleList articleVar="article" categories="{!categoryKeyword}" Keyword="{!searchstring}" pageNumber="{!currentPageNumber}" hasMoreVar="false" pageSize="10">
+<table width="99%">
+<tr>
+<td width="33%">
+<apex:outputLink target="_blank" value="{!URLFOR($Action.KnowledgeArticle.View,article.id,['popup' = 'true'])}">{!article.title}</apex:outputLink>
+</td>
+<td width="33%"><apex:outputText >{!article.articleTypeLabel}</apex:outputText></td>
+<td width="33%"><apex:outputText >{!article.abstract}</apex:outputText></td>
+</tr>
+</table>
+</knowledge:articleList>
+</apex:panelGrid>
+</apex:pageBlock>
+<apex:panelGrid columns="2">
+<apex:commandLink action="{!previous}" value="Previous" style="{!IF(prevRequired = true,'display:block','display:none')}" reRender="theSearchResults"/>
+<apex:commandLink action="{!next}" value="Next" style="{!IF(nextRequired = true,'display:block','display:none')}" reRender="theSearchResults"/>
+</apex:panelGrid>
+</apex:panelGroup>
+</apex:panelGroup>
+</apex:panelGrid>
+<apex:actionFunction action="{!refreshSearchResult}" name="refreshSearchResult" rerender="theSearchResults" >
+</apex:actionFunction>
+</apex:form>
+</apex:page>
+
+----------- controller -------------
+
+public with sharing class VfSearchController{
+//Page Size
+private Static Final Integer PAGE_NUMBER = 10;
+//Search String used in ArticleList tag
+public String searchstring { get; set; }
+//Is new List reqd
+private boolean isRefRequired = true;
+//Exclude filter criteria for UI only
+private static final String EXCLUDE_CRITERIA_FILTER = 'All';
+//Keeps track of current page & max size of article list
+Integer currentPage = 1;
+Integer maxSize = 1;
+//Returns array of Category Groups
+public DataCategoryGroupInfo[] getDataCategoryGroupInfo() {
+return DataCategoryUtil.getInstance().getAllCategoryGroups();
+}
+//Returns category keyword required to filter articleList.
+public String getCategoryKeyword() {
+DataCategoryGroupInfo[] categoryGroups =
+DataCategoryUtil.getInstance().getAllCategoryGroups();
+String categoryCondition = '';
+for (DataCategoryGroupInfo categoryGroup : categoryGroups) {
+String selectedCategoryName =
+System.currentPageReference().getParameters().Get('categoryType_'+categoryGroup.getName());
+if(selectedCategoryName != null && !selectedCategoryName.equals('NoFilter')) {
+if(categoryCondition=='' && selectedCategoryName != null){
+categoryCondition=categoryCondition+categoryGroup.getName() + ':' +
+System.currentPageReference().getParameters().Get('categoryType_'+categoryGroup.getName());
+}else {
+categoryCondition=categoryCondition + ',' +categoryGroup.getName() + ':' +
+System.currentPageReference().getParameters().Get('categoryType_'+categoryGroup.getName());
+}
+}
+}
+String categoryFilter = '';
+for (DataCategoryGroupInfo categoryGroup : categoryGroups) {
+String categoryType ='ASU';
+//System.currentPageReference().getParameters().Get('categoryType_'+categoryGroup.getName());
+system.debug('------categoryType--'+categoryType );
+if(categoryType != null && !categoryType.equals('NoFilter')) {
+if(categoryFilter == ''){
+categoryFilter = categoryGroup.getName() + '__c ABOVE_OR_BELOW ' + categoryType +'__c';
+system.debug('------categoryFilter--'+categoryFilter );
+
+} else {
+ categoryFilter = categoryFilter + ' AND ' + categoryGroup.getName() +'__c ABOVE_OR_BELOW ' + categoryType +'__c';
+}
+}
+}
+try {
+if(categoryFilter.length()>0) {
+if(searchString != null && searchString.length() >0 ) {
+String searchquery = 'FIND \'' + searchString + '*\'IN ALL FIELDS RETURNING KnowledgeArticleVersion(Id, title, UrlName, LastPublishedDate,LastModifiedById where PublishStatus =\'online\' and Language = \'en_US\') WITH DATA CATEGORY '+categoryFilter ;
+List<List<SObject>>searchList = search.query(searchquery);
+List<KnowledgeArticleVersion> articleList = (List<KnowledgeArticleVersion>)searchList[0];
+maxSize = articleList.size() ;
+// maxSize = maxSize.divide(PAGE_NUMBER,2,System.RoundingMode.UP);
+} else {
+String qryString = 'SELECT Id, title, UrlName, LastPublishedDate,LastModifiedById FROM KnowledgeArticleVersion WHERE (PublishStatus = \'online\' and Language = \'en_US\') WITH DATA CATEGORY '+categoryFilter;
+system.debug('***************************categoryFilter*************'+categoryFilter );
+List<KnowledgeArticleVersion> articleList= Database.query(qryString);
+maxSize = articleList.size() ;
+// maxSize = maxSize.divide(PAGE_NUMBER,2,System.RoundingMode.UP);
+}
+} else {
+String qryString = 'SELECT Id, title, UrlName, LastPublishedDate,LastModifiedById FROM KnowledgeArticleVersion WHERE (PublishStatus = \'online\' and Language = \'en_US\')';
+List<KnowledgeArticleVersion> articleList= Database.query(qryString);
+maxSize = articleList.size() ;
+// maxSize = maxSize.divide(PAGE_NUMBER,2,System.RoundingMode.UP);
+}}
+catch(Exception e) {
+Apexpages.addmessages( e );
+}
+if(categoryFilter =='') {
+ maxSize = 0;
+categoryCondition = '' ;
+}
+return categoryCondition;
+}
+// Action call when the new list needs to be fetched
+public PageReference refreshSearchResult() {
+maxSize = currentPage = 1;
+return null;
+}
+// Returns whether we need to see previous button or not
+public boolean getPrevRequired() {
+return currentPage > 1;
+}
+// Returns whether we need to see next button or not
+public boolean getNextRequired() {
+return currentPage * PAGE_NUMBER < maxSize;
+}
+//Returns current page number
+public Decimal getCurrentPageNumber() {
+return this.currentPage;
+}
+//action for next click
+public PageReference next() {
+if(maxSize > this.currentPage * PAGE_NUMBER) {
+this.currentPage = this.currentPage + 1;
+}
+return null;
+}
+//action for previous click
+public PageReference previous() {
+if(this.currentPage > 1)
+this.currentPage = this.currentPage - 1;
+return null;
+}
+}
